@@ -1,4 +1,5 @@
 import pandas as pd
+import json
 import re
 import regex as javare
 import configparser
@@ -64,7 +65,7 @@ Variables to adjust what part of the code will be executed
 lemmatization = False
 generateCorpus = False
 trainMany = True
-coherence = True
+coherence = False
 
 cf = configparser.ConfigParser()
 cf.read('config.cf')
@@ -245,7 +246,7 @@ if trainMany:
     path_corpus = available_corpus[int(selection)]
 
     models_dir = Path2models.joinpath(path_corpus.name)
-    models_dir.mkdir(parents=True)
+    #models_dir.mkdir(parents=True)
 
     #Iterate model training
     for ntopics in ntopicsArray:
@@ -316,6 +317,33 @@ if trainMany:
                     [fout.write(el+'\n') for el in vocab]
                 with path_model.joinpath('vocab_freq.txt').open('w', encoding='utf8') as fout:
                     [fout.write(el[0]+'\t'+str(int(el[1]))+'\n') for el in zip(vocab,term_freq)]
+
+                #Obtain topic-based representation for papers and authors
+                with thetas_file.open() as fin:
+                    S2_ids = [el.split('\t')[1] for el in fin.readlines()]
+                S2_ids = {el:idx for idx,el in enumerate(S2_ids)}
+                
+                #Paper representation
+                papers_df = pd.read_csv(csv_file)
+                
+                with open(path_model.joinpath('paper_topics.txt'), 'w') as fout:
+                    for el in papers_df.values.tolist():
+                        display_tpcs = str(np.array(thetas32_sparse[S2_ids[el[2]],].todense())[0].tolist())[1:-1]
+                        fout.write(el[0]+'\t'+display_tpcs+'\n')
+
+                #Author representation
+                author_files = sorted([d for d in S2_folder.iterdir() if d.name.startswith('Author') and d.name.endswith('.json')])
+                with open(path_model.joinpath('author_topics.txt'), 'w') as fout:
+                    for af in author_files:
+                        with af.open() as fin:
+                            author_data = json.load(fin)
+                        paper_pos = [S2_ids[el['paperId']] for el in author_data['papers'] if el['paperId'] in S2_ids]
+                        n_papers = len(paper_pos)
+                        topic_submatr = thetas32_sparse[paper_pos,]
+                        author_topics = np.array(np.mean(topic_submatr, axis=0))[0]
+                        display_tpcs = str(author_topics.tolist())[1:-1]
+                        fout.write(author_data['name']+'\t'+str(n_papers)+'\t'+display_tpcs+'\n')
+
 """
 ============================================================
 Calculate coherence of lemasAbstract model
@@ -326,8 +354,7 @@ if coherence:
     available_models = sorted([d for d in Path2models.iterdir() if d.is_dir()])
     display_models = [str(idx) +'. ' + d.name for idx,d in enumerate(available_models)]
     [print(option) for option in display_models]
-    #selection = input('Select model for coherence calculation: ')
-    selection = 0
+    selection = input('Select model for coherence calculation: ')
     path_model = available_models[int(selection)]
 
     all_models = [d for d in path_model.iterdir() if d.is_dir()]
