@@ -64,8 +64,8 @@ Variables to adjust what part of the code will be executed
 
 lemmatization = False
 generateCorpus = False
-trainMany = True
-coherence = False
+trainMany = False
+coherence = True
 
 cf = configparser.ConfigParser()
 cf.read('config.cf')
@@ -152,7 +152,7 @@ if generateCorpus:
 
     from lemmatizer.ENlemmatizer import stwEQcleaner
     stwEQ = stwEQcleaner(stw_files=[stw_file, corpus_stw], dict_eq_file=corpus_eqs)
-    
+    """
     #############################################################
     # Generate corpus with lemas for the abstracts
     #############################################################
@@ -224,6 +224,87 @@ if generateCorpus:
         check_output(args=cmd, shell=True)
     except:
         print('-- -- Mallet failed to import data. Revise command')
+    """
+    #############################################################
+    # Generate corpus with EuropePMC entities
+    #############################################################
+    corpus_dir = Path2corpus.joinpath('EuropePMCAnnotations')
+    print('El corpus ampliado con las Anotaciones de EuropePMC se guardará en el directorio', corpus_dir)
+    corpus_dir.mkdir()
+
+    import_config = corpus_dir.joinpath('import.config')
+    with import_config.open('w', encoding='utf8') as fout:
+        fout.write('min_lemas = ' + str(min_lemas) + '\n')
+        fout.write('no_below = ' + str(no_below) + '\n')
+        fout.write('no_above = ' + str(no_above) + '\n')
+        fout.write('keep_n = ' + str(keep_n) + '\n')
+        fout.write('token_regexp = ' + str(token_regexp) + '\n')
+        
+    #Translate PMID to S2ID
+    df = pd.read_csv(csv_file_extended).replace(np.nan, '', regex=True)
+    PMID_2_S2 = {str(int(el[1])):el[0] for el in df[['S2paperID', 'pmid']].values.tolist() if el[1]}
+   
+    annotation_files = sorted([d for d in annotations_folder.iterdir() if d.name.startswith('PMID')])
+    #Build corpus from annotations
+    id_lema = []
+    for af in annotation_files:
+        S2_ID = PMID_2_S2[af.name.split('.')[0][4:]]
+        with af.open() as fin:
+            annotation_data = json.load(fin)
+        if len(annotation_data):
+            lemas = ' '.join([el['exact'].replace(' ', '_') for el in annotation_data[0]['annotations']])
+            id_lema.append([S2_ID, lemas])
+
+    df = pd.read_csv(csv_file)
+    S2_base = set(df['S2ID'].values.tolist())
+    
+    dictionary = corpora.Dictionary()
+    id_lema = [[el[0], ' '.join(token_regexp.findall(str(el[1]).replace('\n',' ').strip()))]
+                        for el in id_lema]
+    id_lema = [[el[0], stwEQ.cleanstr(el[1]).split()] for el in id_lema]
+    all_lemas = [el[1] for el in id_lema if len(el[1])>=min_lemas or el[0] in S2_base]
+    dictionary.add_documents(all_lemas)
+
+    #Remove words that appear in less than no_below documents, or in more than
+    #no_above, and keep at most keep_n most frequent terms, keep track of removed
+    #words for debugging purposes
+    all_words = [dictionary[idx] for idx in range(len(dictionary))]
+    dictionary.filter_extremes(no_below=no_below, no_above=no_above, keep_n=keep_n)
+    kept_words = set([dictionary[idx] for idx in range(len(dictionary))])
+
+    corpus_file = corpus_dir.joinpath('EuropePMCAnnotations.txt')
+    corpus_mallet = corpus_dir.joinpath('EuropePMCAnnotations.mallet')
+    id_lema = [[el[0], [tk for tk in el[1] if tk in kept_words]] for el in id_lema]
+    id_lema = [[el[0], stwEQ.cleanstr(' '.join(el[1])).split()] for el in id_lema]
+    id_lema = [el for el in id_lema if len(el[1])>=min_lemas or el[0] in S2_base]
+    #Check if all papers in base dataset are in the extended corpus
+    #since they could have been removed if the lemmatizer did not provide a valid
+    #output for them
+    df = pd.read_csv(csv_file)
+    S2_base = set(df['S2ID'].values.tolist())
+    S2_in = [el for el in id_lema if el[0] in S2_base]
+    if len(S2_in)==len(S2_base):
+        printgr('Todos los papers del dataset base se han incorporado al dataset extendido de Abstracts lematizados')
+    else:
+        printred('Se han perdido papers del dataset base ' + str(len(S2_in)) + ' / ' + str(len(S2_base)))
+
+    print('Generating corpus, #papers:', len(id_lema))
+
+    with corpus_file.open('w', encoding='utf-8') as fout:
+        [fout.write(el[0] + ' 0 ' + ' '.join(el[1]) + '\n') for el in id_lema]
+
+    token_regexp=cf.get('CorpusGeneration','token_regexp')
+    cmd = str(mallet_path) + \
+              ' import-file --preserve-case --keep-sequence ' + \
+              '--remove-stopwords --token-regex "' + token_regexp + '" ' + \
+              '--input %s --output %s'
+    cmd = cmd % (corpus_file, corpus_mallet)
+
+    try:
+        print(f'-- -- Running command {cmd}')
+        check_output(args=cmd, shell=True)
+    except:
+        print('-- -- Mallet failed to import data. Revise command')
 
 """
 ============================================================
@@ -246,7 +327,7 @@ if trainMany:
     path_corpus = available_corpus[int(selection)]
 
     models_dir = Path2models.joinpath(path_corpus.name)
-    #models_dir.mkdir(parents=True)
+    models_dir.mkdir(parents=True)
 
     #Iterate model training
     for ntopics in ntopicsArray:
