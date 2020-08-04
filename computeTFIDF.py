@@ -4,22 +4,32 @@ from pathlib import Path
 import pandas as pd
 import ipdb
 
-extended = False
+postFilter = True
 
-corpus_file = Path('./corpus/AGR/lemasAbstract/lemasAbstract.txt')
-#corpus_file = Path('./corpus/AGR/EuropePMCAnnotations/EuropePMCAnnotations.txt')
+#corpus_file = Path('./corpus/AGR/lemasAbstract/lemasAbstract.txt')
+corpus_file = Path('./corpus/AGR/EuropePMCAnnotations/EuropePMCAnnotations.txt')
 base_docs = Path('./data/AGR/PMC_PMID_S2.csv')
 
-vocab_tfidf_file = Path('./vocab_tfidf.txt')
-corpus_tfidf_file = Path('./corpus_tfidf.txt')
+#base_tfidf = Path('./TFIDFcorpus/AGR/lemasAbstract/')
+base_tfidf = Path('./TFIDFcorpus/AGR/EuropePMCAnnotations/')
+
+##############################################################
+# 1. Calculamos TFIDF sobre el dataset base únicamente
+##############################################################
+vocab_tfidf_file = base_tfidf.joinpath('BASE_vocab_tfidf.txt')
+corpus_tfidf_file = base_tfidf.joinpath('BASE_corpus_tfidf.txt')
+wdcorpus_tfidf_file = base_tfidf.joinpath('BASE_WDcorpus_tfidf.txt')
 
 with corpus_file.open('r') as fin:
     corpus = fin.readlines()
 
-if not extended:
-    df = pd.read_csv(base_docs)
-    base_ids = set(df['S2ID'].values.tolist())
-    corpus = [el for el in corpus if el.strip().split()[0] in base_ids]
+#Prefiltering of documents not in BASE corpus
+df = pd.read_csv(base_docs)
+base_ids = set(df['S2ID'].values.tolist())
+corpus = [el for el in corpus if el.strip().split()[0] in base_ids]
+#S2ID to PMCID dictionary
+map_dct = df[['S2ID','PMCID']].values.tolist()
+map_dct = {el[0]:el[1] for el in map_dct}
 
 ids = [el.strip().split()[0] for el in corpus]
 corpus = [el.strip().split()[2:] for el in corpus]
@@ -32,15 +42,70 @@ corpus_tfidf = [model[el] for el in corpus_bow]
 vocab_tfidf = [dct[el] for el in dct.keys()]
 
 with vocab_tfidf_file.open('w') as fout:
-    [fout.write(wd + '\n') for wd in vocab_tfidf]
+    [fout.write(str(idx) + ':' + wd + '\n') for idx,wd in enumerate(vocab_tfidf)]
 
 with corpus_tfidf_file.open('w') as fout:
     for doc_id, doc_tfidf in zip(ids, corpus_tfidf):
-        fout.write(doc_id)
+        fout.write(doc_id + ' ' + map_dct[doc_id])
         for token in doc_tfidf:
             fout.write(' ' + str(token[0]) + ':' + str(token[1]))
 
         fout.write('\n')
 
+with wdcorpus_tfidf_file.open('w') as fout:
+    for doc_id, doc_tfidf in zip(ids, corpus_tfidf):
+        fout.write(doc_id + ' ' + map_dct[doc_id])
+        for token in doc_tfidf:
+            fout.write(' ' + vocab_tfidf[token[0]] + ':' + str(token[1]))
+
+        fout.write('\n')
+
+
+##############################################################
+# 2. Calculamos TFIDF sobre el dataset extendido únicamente
+##############################################################
+vocab_tfidf_file = base_tfidf.joinpath('EXT_vocab_tfidf.txt')
+corpus_tfidf_file = base_tfidf.joinpath('EXT_corpus_tfidf.txt')
+wdcorpus_tfidf_file = base_tfidf.joinpath('EXT_WDcorpus_tfidf.txt')
+
+with corpus_file.open('r') as fin:
+    corpus = fin.readlines()
+
+ids = [el.strip().split()[0] for el in corpus]
+corpus = [el.strip().split()[2:] for el in corpus]
+
+dct = Dictionary(corpus)  # fit dictionary
+corpus_bow = [dct.doc2bow(line) for line in corpus]  # convert corpus to BoW format
+
+model = TfidfModel(corpus_bow)
+
+with corpus_file.open('r') as fin:
+    corpus = fin.readlines()
+corpus = [el for el in corpus if el.strip().split()[0] in base_ids]
+ids = [el.strip().split()[0] for el in corpus]
+corpus = [el.strip().split()[2:] for el in corpus]
+corpus_bow = [dct.doc2bow(line) for line in corpus]
+
+corpus_tfidf = [model[el] for el in corpus_bow]
+vocab_tfidf = [dct[el] for el in dct.keys()]
+
+with vocab_tfidf_file.open('w') as fout:
+    [fout.write(str(idx) + ':' + wd + '\n') for idx,wd in enumerate(vocab_tfidf)]
+
+with corpus_tfidf_file.open('w') as fout:
+    for doc_id, doc_tfidf in zip(ids, corpus_tfidf):
+        fout.write(doc_id + ' ' + map_dct[doc_id])
+        for token in doc_tfidf:
+            fout.write(' ' + str(token[0]) + ':' + str(token[1]))
+
+        fout.write('\n')
+
+with wdcorpus_tfidf_file.open('w') as fout:
+    for doc_id, doc_tfidf in zip(ids, corpus_tfidf):
+        fout.write(doc_id + ' ' + map_dct[doc_id])
+        for token in doc_tfidf:
+            fout.write(' ' + vocab_tfidf[token[0]] + ':' + str(token[1]))
+
+        fout.write('\n')
 
 
