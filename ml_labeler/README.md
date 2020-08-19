@@ -22,15 +22,17 @@ To run the scripts, a source data folder should exist, with the following struct
 
     source
     |- netl_support_files
-        |- page_rank_titles_sorted.txt
-        |- svm_model
-        |- svm_rank_classify
+    |    |- page_rank_titles_sorted.txt
+    |    |- svm_model
+    |    |- svm_rank_classify
     |- taxonomy
-        |- EuroSciVoc_Category-All-Report.xlsx
-        |- agrovocab.yml
+    |    |- EuroSciVoc_Category-All-Report.xlsx
+    |    |- agrovocab.yml
     |- model
-        |- BASE_WDcorpus_tfidf
-        |- EXT_WDcorpus_tfidf
+    |   |- BASE_WDcorpus_tfidf
+    |   |- EXT_WDcorpus_tfidf
+    |-wikisources
+         |-enwiki-20200801-all-titles-in-ns0
 
 ### 2.1. NETL support files
 
@@ -57,6 +59,10 @@ You need the file corresponding to the selected taxonomy (`scv` or `agr` in the 
 ### 2.3. Models
 
 Model is the folder that contain the inputs to the classifier. Each script `bow2tax.py` and `map2tax.py`, require a different file structure, as will be explained below.
+
+### 2.4. Wikisources
+
+The file [enwiki-20200801-all-titles-in-ns0](https://dumps.wikimedia.org/enwiki/20200801/enwiki-20200801-all-titles-in-ns0.gz) is optional, but it is useful to reduce the number of queries to the wikipedia site during the computation of mappings from the target categories to the wikipedia categories used by NETL.
 
 ## 3. Usage
 
@@ -223,7 +229,9 @@ The original code is at (https://github.com/sb1992/NETL-Automatic-Topic-Labellin
    * Date:           January 7, 2019
    * Fix:            Updated to work with Python 3.6.5
 
-One method has been taken without modifications:
+The original code has been modified to provide some class structure, to modify the input and output data structure and also to speedup execution, specially for large vocabularies and documents.
+
+Only one method has been taken without modifications:
 
     def get_topic_lt(self, elem):
 
@@ -238,14 +246,13 @@ Other methods have been modified for higher speed, though the computing steps ar
                          feature_names, topic_list, categories):
     def convert_dataset(self, test_file, feature_names):
 
-The main method, `**get_labels(...)**` has been adapted to changes the input and output data structure, but the sequence of calls to the processing methods is the same.
+The main method, **`get_labels(...)`** has been adapted to changes the input and output data structure, but the sequence of calls to the processing methods is the same.
 
 Finally, the following methods are original:
 
     def read_candidates(self, path2tax):
     def wikitest(self, cat, page_rank_dict):
     def get_map2wiki(self, cats, page_rank_dict):
-
 
 
 
