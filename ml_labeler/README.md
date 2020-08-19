@@ -47,7 +47,7 @@ The pre-computed page rank file `page_rank_titles_sorted.txt` can be taken from 
 
 ### 2.2. Taxonomy files
 
-The [data](https://github.com/Orieus/map2tax/blob/master/data) subfolder from the code should contain files [map_agr2wiki.yml](https://github.com/Orieus/map2tax/blob/master/data/map_agr2wiki.yml) and [map_esv2wiki.yml](https://github.com/Orieus/map2tax/blob/master/data/map_esv2wiki.yml). These files contain one-to-one map from each target taxonomy (EuroSciVoc or AgroVoc) to the wikipedia categories used by the NETL-based classifier.
+The [cats](https://github.com/everis-hcl/edma-challenge/tree/master/ml_labeler/cats) subfolder from the code should contain files [map_agr2wiki.yml](https://github.com/everis-hcl/edma-challenge/tree/master/ml_labeler/cats/map_agr2wiki.yml) and [map_esv2wiki.yml](https://github.com/everis-hcl/edma-challenge/tree/master/ml_labeler/cats/map_esv2wiki.yml). These files contain one-to-one map from each target taxonomy (EuroSciVoc or AgroVoc) to the wikipedia categories used by the NETL-based classifier.
 
 When these file are not available, they can be computed. The `taxonomy` folder contains the files required to compute them.
 
@@ -168,7 +168,7 @@ The output is a yaml file with the categories extracted from AgroVoc. This file 
 
 Script `bow2tax.py` and `map2tax.py` are specifically oriented to the data files used for the edma-challenge, but other similar scripts could be written to apply the classifier to other data sources.
 
-The main classes and methods of the labeling tool are found in [my_supervised_labels.py](https://github.com/Orieus/map2tax/blob/master/my_supervised_labels.py).
+The main classes and methods of the labeling tool are found in [my_supervised_labels.py](https://github.com/everis-hcl/edma-challenge/tree/master/ml_labeler/my_supervised_labels.py).
 
 ### Classes
 
