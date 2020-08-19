@@ -80,7 +80,7 @@ class SupLabeler(object):
 
         # Path to the fila that contains (or will contain) the map from
         # target categories to wikipedia titles.
-        self.p2wikimap = pathlib.Path('data') / 'map_esv2wiki.yml'
+        self.p2wikimap = pathlib.Path('cats') / 'map_esv2wiki.yml'
 
         return
 
@@ -662,7 +662,7 @@ class AGRLabeler(SupLabeler):
 
         # Path to the fila that contains (or will contain) the map from
         # target categories to wikipedia titles.
-        self.p2wikimap = pathlib.Path('data') / 'map_agr2wiki.yml'
+        self.p2wikimap = pathlib.Path('cats') / 'map_agr2wiki.yml'
 
         return
 
@@ -707,7 +707,7 @@ class AGRLabeler(SupLabeler):
         tag2concept = {y: x for x, y in tag2concept.items()}
 
         # Save inverse map into file
-        fpath = pathlib.Path('data') / 'tag2concept.yml'
+        fpath = pathlib.Path('cats') / 'tag2concept.yml'
         with open(fpath, 'w', encoding="utf-8") as f:
             yaml.dump(tag2concept, f, default_flow_style=False, sort_keys=True)
 
@@ -811,5 +811,4 @@ class AGRLabeler(SupLabeler):
         print(f"-- -- {len(cats_2_test)} cats remain with alternate labels")
 
         return
-
 
