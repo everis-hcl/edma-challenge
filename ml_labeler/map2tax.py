@@ -18,7 +18,7 @@ with apache license 2.0.
 Most code is a modification of /model_run/supervised_labels.py. Some methods
 have been significantly changed to speedup.
 
-USAGE: (see bou2tax --help for details)
+USAGE: (see map2tax --help for details)
 
 bow2tax.py [-h] [--source SOURCE] [--tax TAX] [--path2tax PATH2TAX]
                   [--model MODEL] [--output OUTPUT] [--tmax TMAX]
@@ -367,5 +367,5 @@ for tag in tags:
 
     print(f"-- Output written in {out_sup}")
 
-
+print(f'-- Labels computed in {time()-t0} seconds')
 print('-- End.')

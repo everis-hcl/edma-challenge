@@ -554,8 +554,8 @@ class SupLabeler(object):
             print('-- Map to wiki labels loaded')
         else:
 
-            print("-- -- Wikipedia map is not available. Computing map."
-                  " This may take a while...")
+            print(f"-- -- Wikipedia map is not available in "
+                  f"{self.p2wikimap}. Computing map. This may take a while...")
 
             # Load all wikipedia titles from file (only if a path is provided
             # in p2wikifile. The titles are stored in self.wiki_titles and
