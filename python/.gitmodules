@@ -1,0 +1,3 @@
+[submodule "dbManager"]
+	path = dbManager
+	url = https://github.com/jeroarenas/dbManager
