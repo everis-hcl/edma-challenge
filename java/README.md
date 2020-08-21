@@ -39,4 +39,4 @@ Once this script finishes, launch the next script -
 
 ```
 python RunSPARQLMapperGIT.py
-```This will run the mapping for all GIT data and produce output excel files.
+This will run the mapping for all GIT data and produce output excel files.
