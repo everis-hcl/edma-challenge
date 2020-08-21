@@ -15,6 +15,5 @@ scikit-learn==0.21.3
 scipy==1.4.1
 tqdm==4.46.1
 pathlib2==2.3.5
-mysqlclient==1.4.4
 pyyaml
 wikipedia
