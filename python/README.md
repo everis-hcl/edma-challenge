@@ -1,5 +1,6 @@
 
 
+
 # Python scritps
 
 ## 1. Prerequisites
@@ -7,7 +8,7 @@
  * [Anaconda](https://docs.anaconda.com/anaconda/install/)
  * [virtualenv](https://pypi.org/project/virtualenv/)
 
-## 2. Scripts:
+## 2. Scripts
 
 The tool includes three executable python scripts:
 
@@ -21,7 +22,8 @@ The tool includes three executable python scripts:
 *  **`TrainModelsBIO.py`**: Train models for BIO corpus.
 
 
-## 3. Requirements:
+
+## 3. Requirements
 
 To run the scripts, you should:
 * **`Create an virtual environment`**: py -m venv env
@@ -30,6 +32,7 @@ To run the scripts, you should:
 * **`Install the dbManager`**: from ./dbManager or from [here](https://github.com/jeroarenas/dbManager).
 * **`Install the Mallet`**: [http://mallet.cs.umass.edu/](http://mallet.cs.umass.edu/)
 
+Copy in the data_file folder in the python directory (4 directories are added `corpus`, `data`, `models` and `TFIDFcorpus`).
 
 ## 3. Run the scripts:
 
@@ -41,4 +44,4 @@ Once you have installed everything, you can run the script in the following orde
 *  **`computeTFIDF_GIT.py`**: Calculate TFIDF for GIT corpus.
 * **`TrainModelsAGR.py`**: Train models for AGR corpus.
 *  **`TrainModelsBIO.py`**: Train models for BIO corpus.
-* * **`ml_labeler`**: ML labeler source code and  guidelines.
+* **`ml_labeler`**: ML labeler source code and  guidelines.
