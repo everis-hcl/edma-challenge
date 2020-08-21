@@ -39,8 +39,6 @@ To run the scripts, a source data folder should exist, with the following struct
     |-wikisources
          |-enwiki-20200801-all-titles-in-ns0
 
-A pre-installed python environment can be access by running **`.\..\env\Scripts\activate`** in **`edma-challenge\ml_labeler`**.
-
 ### 3.1. NETL support files
 
 Files `svm_model` and `svm_rank_classif` can be taken from the [SVMrank](http://www.cs.cornell.edu/people/tj/svm_light/svm_rank.html) site. Download the source files according to your OS. Binaries are available for
