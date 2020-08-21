@@ -82,7 +82,7 @@ public class SPARQLMapper
 
 		// for AGR and non-author documents, the documentId is at index 1, else it is index 0
 		int documentIdx = ("AGR".equals(documentType) && !(corpusFileName.contains("AUTHOR") || corpusFileName.contains("author"))) ? 1 : 0;
-		HashMap<String, Map<String, Double>> documentMap = processKeywordReplacedCorpusFile(!keywordReplacedCorpusFile.isEmpty() ? keywordReplacedCorpusFile : corpusFileName, documentIdx);
+		LinkedHashMap<String, Map<String, Double>> documentMap = processKeywordReplacedCorpusFile(!keywordReplacedCorpusFile.isEmpty() ? keywordReplacedCorpusFile : corpusFileName, documentIdx);
 		performMappingForDocuments(documentMap, mappingExcelFile);
 		System.out.println("\nProcessing completed for input file:"+corpusFileName);
 		System.out.println("\nOutput file location:"+mappingExcelFile);
