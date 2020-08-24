@@ -29,10 +29,9 @@ To run the scripts, you should:
 * **`Create an virtual environment`**: py -m venv env
 * **`Activaite the venv`**: ./env/Scripts/activate
 * **`Install the dependencies`**: pip install -r requirements.txt
-* **`Install the dbManager`**: from ./dbManager or from [here](https://github.com/jeroarenas/dbManager).
 * **`Install the Mallet`**: [http://mallet.cs.umass.edu/](http://mallet.cs.umass.edu/)
 
-Copy in the data_file folder in the python directory (4 directories are added `corpus`, `data`, `models` and `TFIDFcorpus`).
+Download and copy in the [data_file folder](http://www.tsc.uc3m.es/~jarenas/data_files.tgz) in the python directory (4 directories are added `corpus`, `data`, `models` and `TFIDFcorpus`).
 
 ## 3. Run the scripts:
 

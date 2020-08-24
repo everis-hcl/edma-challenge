@@ -1,4 +1,5 @@
 
+
 # ML labelling
 
 ML labelling is a tool to label lists of words to a given taxonomy. 
@@ -12,6 +13,8 @@ The tool is oriented to process the specific files generated for the **edma chal
 ## 1. Prerequisites
  * [Python 3.8](https://www.python.org/downloads/)
  * [Anaconda](https://docs.anaconda.com/anaconda/install/)
+ * [Requirement from python folder](https://github.com/everis-hcl/edma-challenge/blob/master/python/README.md)
+
 
 ## 2. Scripts:
 
@@ -38,6 +41,8 @@ To run the scripts, a source data folder should exist, with the following struct
     |   |- EXT_WDcorpus_tfidf
     |-wikisources
          |-enwiki-20200801-all-titles-in-ns0
+
+An example of the source folder can be taken from [here](http://www.tsc.uc3m.es/~jcid/source.tar.gz).
 
 ### 3.1. NETL support files
 

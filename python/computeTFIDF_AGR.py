@@ -11,7 +11,7 @@ corpus_file = Path('./corpus/AGR/lemasAbstract/lemasAbstract.txt')
 #corpus_file = Path('./corpus/AGR/EuropePMCAnnotations/EuropePMCAnnotations.txt')
 base_docs = Path('./data/AGR/PMC_PMID_S2.csv')
 
-base_tfidf = Path('./TFIDFcorpus/AGR/lemasAbstract/')
+base_tfidf = Path('./../data/TFIDFcorpus/AGR/lemasAbstract/')
 #base_tfidf = Path('./TFIDFcorpus/AGR/EuropePMCAnnotations/')
 
 S2_folder = Path('./data/AGR/Extended_AGR')
