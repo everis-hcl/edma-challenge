@@ -11,7 +11,7 @@ from lemmatizer.ENlemmatizer import ENLemmatizer
 
 corpus_folder = Path('./data/GIT/GitFiles')
 
-base_tfidf = Path('./TFIDFcorpus/GIT/lemasReadme/')
+base_tfidf = Path('./../data/TFIDFcorpus/GIT/lemasReadme/')
 
 try:
     # UCS-4

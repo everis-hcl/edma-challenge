@@ -9,7 +9,7 @@ from gensim import corpora
 from gensim.utils import check_output
 from sklearn.preprocessing import normalize
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from sklearn.preprocessing import normalize
 from scipy import sparse
 import scipy
@@ -18,7 +18,7 @@ from gensim.models.coherencemodel import CoherenceModel
 import ipdb
 
 from utils import printgr, printred, printmag
-from dbManager.base_dm_sql import BaseDMsql
+# from dbManager.base_dm_sql import BaseDMsql
 
 try:
     # UCS-4
@@ -85,9 +85,9 @@ if lemmatization:
     dbPASS = cf.get('DB', 'dbPASS')
     dbSERVER = cf.get('DB', 'dbSERVER')
     dbSOCKET = cf.get('DB', 'dbSOCKET')
-    DM = BaseDMsql(db_name=dbNAME, db_connector=dbCONNECTOR, path2db=None,
-               db_server=dbSERVER, db_user=dbUSER, db_password=dbPASS,
-               unix_socket=dbSOCKET)
+    # DM = BaseDMsql(db_name=dbNAME, db_connector=dbCONNECTOR, path2db=None,
+    #            db_server=dbSERVER, db_user=dbUSER, db_password=dbPASS,
+    #            unix_socket=dbSOCKET)
     
     printgr('Reading Bio-Protocols from database')
     base_df = pd.read_csv(csv_file, low_memory=False, dtype=str)
@@ -98,79 +98,79 @@ if lemmatization:
     
     BIO_df = pd.DataFrame(columns=['ProtocolID', 'S2paperID', 'title', 'paperAbstract', 'procedure', 'keywords'])
     #Empezamos leyendo todos los artículos que no están en el dataset base
-    for S2id in extended_S2:
-        dfaux = DM.readDBtable('S2papers', limit=None, selectOptions='S2paperID, title, paperAbstract',
-                                filterOptions='S2paperID="'+S2id+'"')
-        BIO_df = BIO_df.append(dfaux, ignore_index = True, sort=False)
-    #Now, we move to the protocols in the base dataset
-    protocols = [f for f in protocols_folder.iterdir() if f.name.endswith('.json')]
-    all_prot_data = []
-    for protocol in protocols:
-        with protocol.open() as fin:
-            protocol_data = json.load(fin)
-        protocolID = protocol.name.split('.json')[0]
-        if protocolID in Protocol_S2:
-            S2paperID = Protocol_S2[protocolID]
-        else:
-            S2paperID = 'N/A'
-        title = protocol_data['title'].strip()
-        abstract = protocol_data['abstract'].strip()
-        procedure = ' '.join(protocol_data['procedure'])
-        if 'keywords' in protocol_data:
-            keywords = ','.join([el.replace(' ', '_') for el in protocol_data['keywords']])
-        else:
-            keywords = ''
-        all_prot_data.append([protocolID, S2paperID, title, abstract, procedure, keywords])
-    dfaux = pd.DataFrame(data=all_prot_data, columns=['ProtocolID', 'S2paperID', 'title', 'paperAbstract', 'procedure', 'keywords'])
-    BIO_df = BIO_df.append(dfaux, ignore_index = True, sort=False)
-    BIO_df = BIO_df.fillna('')
-    print('BIO-protocol extended data loaded, #papers:', len(BIO_df))
+    # for S2id in extended_S2:
+    #     dfaux = DM.readDBtable('S2papers', limit=None, selectOptions='S2paperID, title, paperAbstract',
+    #                             filterOptions='S2paperID="'+S2id+'"')
+    #     BIO_df = BIO_df.append(dfaux, ignore_index = True, sort=False)
+    # #Now, we move to the protocols in the base dataset
+    # protocols = [f for f in protocols_folder.iterdir() if f.name.endswith('.json')]
+    # all_prot_data = []
+    # for protocol in protocols:
+    #     with protocol.open() as fin:
+    #         protocol_data = json.load(fin)
+    #     protocolID = protocol.name.split('.json')[0]
+    #     if protocolID in Protocol_S2:
+    #         S2paperID = Protocol_S2[protocolID]
+    #     else:
+    #         S2paperID = 'N/A'
+    #     title = protocol_data['title'].strip()
+    #     abstract = protocol_data['abstract'].strip()
+    #     procedure = ' '.join(protocol_data['procedure'])
+    #     if 'keywords' in protocol_data:
+    #         keywords = ','.join([el.replace(' ', '_') for el in protocol_data['keywords']])
+    #     else:
+    #         keywords = ''
+    #     all_prot_data.append([protocolID, S2paperID, title, abstract, procedure, keywords])
+    # dfaux = pd.DataFrame(data=all_prot_data, columns=['ProtocolID', 'S2paperID', 'title', 'paperAbstract', 'procedure', 'keywords'])
+    # BIO_df = BIO_df.append(dfaux, ignore_index = True, sort=False)
+    # BIO_df = BIO_df.fillna('')
+    # print('BIO-protocol extended data loaded, #papers:', len(BIO_df))
 
-    from lemmatizer.ENlemmatizer import ENLemmatizer
-    lemmas_server = cf.get('Lemmatizer', 'server')
-    stw_file = Path(cf.get('Lemmatizer', 'default_stw_file'))
-    dict_eq_file = Path(cf.get('Lemmatizer', 'default_dict_eq_file'))
-    POS = cf.get('Lemmatizer', 'POS')
-    concurrent_posts = int(cf.get('Lemmatizer', 'concurrent_posts'))
-    removenumbers = cf.get('Lemmatizer', 'removenumbers') == 'True'
-    keepSentence = cf.get('Lemmatizer', 'keepSentence') == 'True'
-    init_time = time.time()
-    #Initialize lemmatizer
-    ENLM = ENLemmatizer(lemmas_server=lemmas_server, stw_file=stw_file,
-                    dict_eq_file=dict_eq_file, POS=POS, removenumbers=removenumbers,
-                    keepSentence=keepSentence)
+    # from lemmatizer.ENlemmatizer import ENLemmatizer
+    # lemmas_server = cf.get('Lemmatizer', 'server')
+    # stw_file = Path(cf.get('Lemmatizer', 'default_stw_file'))
+    # dict_eq_file = Path(cf.get('Lemmatizer', 'default_dict_eq_file'))
+    # POS = cf.get('Lemmatizer', 'POS')
+    # concurrent_posts = int(cf.get('Lemmatizer', 'concurrent_posts'))
+    # removenumbers = cf.get('Lemmatizer', 'removenumbers') == 'True'
+    # keepSentence = cf.get('Lemmatizer', 'keepSentence') == 'True'
+    # init_time = time.time()
+    # #Initialize lemmatizer
+    # ENLM = ENLemmatizer(lemmas_server=lemmas_server, stw_file=stw_file,
+    #                 dict_eq_file=dict_eq_file, POS=POS, removenumbers=removenumbers,
+    #                 keepSentence=keepSentence)
 
-    BIO_df['alltext'] = BIO_df['title'] + '. ' + BIO_df['paperAbstract']
-    BIO_df['alltext'] = BIO_df['alltext'].apply(clean_utf8)
-    BIO_df['procedure'] = BIO_df['procedure'].apply(clean_utf8)
-    lemasBatch = ENLM.lemmatizeBatch(BIO_df[['S2paperID', 'alltext']].values.tolist(),
-                                                processes=concurrent_posts)
-    #Remove entries that where not lemmatized correctly
-    lemasBatch = [[el[0], clean_utf8(el[1])] for el in lemasBatch]
-    print('Successful lemmatized documents: {len(lemasBatch)}')
-    BIO_df['LEMAS'] = [el[1] for el in lemasBatch]
+    # BIO_df['alltext'] = BIO_df['title'] + '. ' + BIO_df['paperAbstract']
+    # BIO_df['alltext'] = BIO_df['alltext'].apply(clean_utf8)
+    # BIO_df['procedure'] = BIO_df['procedure'].apply(clean_utf8)
+    # lemasBatch = ENLM.lemmatizeBatch(BIO_df[['S2paperID', 'alltext']].values.tolist(),
+    #                                             processes=concurrent_posts)
+    # #Remove entries that where not lemmatized correctly
+    # lemasBatch = [[el[0], clean_utf8(el[1])] for el in lemasBatch]
+    # print('Successful lemmatized documents: {len(lemasBatch)}')
+    # BIO_df['LEMAS'] = [el[1] for el in lemasBatch]
     
-    #Lemmatize also the procedures (only for Protocol data)
-    lemasBatch = []
-    for idx, el in enumerate(BIO_df[['S2paperID', 'procedure']].values.tolist()):
-        print(idx)
-        if len(el[1]):
-            lemmatized = ENLM.cleanAndLemmatize(el)
-        else:
-            lemmatized = el
-        lemasBatch.append(lemmatized)
-    del ENLM
+    # #Lemmatize also the procedures (only for Protocol data)
+    # lemasBatch = []
+    # for idx, el in enumerate(BIO_df[['S2paperID', 'procedure']].values.tolist()):
+    #     print(idx)
+    #     if len(el[1]):
+    #         lemmatized = ENLM.cleanAndLemmatize(el)
+    #     else:
+    #         lemmatized = el
+    #     lemasBatch.append(lemmatized)
+    # del ENLM
 
-    #Remove entries that where not lemmatized correctly
-    lemasBatch = [[el[0], clean_utf8(el[1])] for el in lemasBatch]
-    print('Successful lemmatized documents: {len(lemasBatch)}')
-    BIO_df['LEMASprocedures'] = [el[1] for el in lemasBatch]
+    # #Remove entries that where not lemmatized correctly
+    # lemasBatch = [[el[0], clean_utf8(el[1])] for el in lemasBatch]
+    # print('Successful lemmatized documents: {len(lemasBatch)}')
+    # BIO_df['LEMASprocedures'] = [el[1] for el in lemasBatch]
 
-    #Save lemas to file
-    if not Path2corpus.exists():
-        Path2corpus.mkdir(parents=True)
-    BIO_df = BIO_df.replace(np.nan, '', regex=True)
-    BIO_df.to_csv(lemas_file, index=False)
+    # #Save lemas to file
+    # if not Path2corpus.exists():
+    #     Path2corpus.mkdir(parents=True)
+    # BIO_df = BIO_df.replace(np.nan, '', regex=True)
+    # BIO_df.to_csv(lemas_file, index=False)
 
 
 """
@@ -377,13 +377,13 @@ if trainMany:
                 thetas_file = path_model.joinpath('doc-topics.txt')
                 cols = [k for k in np.arange(2,ntopics+2)]
                 thetas32 = np.loadtxt(thetas_file, delimiter='\t', dtype=np.float32, usecols=cols)
-                allvalues = np.sort(thetas32.flatten())
-                step = int(np.round(len(allvalues)/1000))
-                plt.semilogx(allvalues[::step], (100/len(allvalues))*np.arange(0,len(allvalues))[::step])
-                plt.semilogx([sparse_thr, sparse_thr], [0,100], 'r')
-                plot_file = path_model.joinpath('thetas_dist.pdf')
-                plt.savefig(plot_file)
-                plt.close()
+                # allvalues = np.sort(thetas32.flatten())
+                # step = int(np.round(len(allvalues)/1000))
+                # plt.semilogx(allvalues[::step], (100/len(allvalues))*np.arange(0,len(allvalues))[::step])
+                # plt.semilogx([sparse_thr, sparse_thr], [0,100], 'r')
+                # plot_file = path_model.joinpath('thetas_dist.pdf')
+                # plt.savefig(plot_file)
+                # plt.close()
 
                 #sparsify thetas
                 thetas32[thetas32<sparse_thr] = 0

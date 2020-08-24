@@ -9,7 +9,7 @@ from gensim import corpora
 from gensim.utils import check_output
 from sklearn.preprocessing import normalize
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from sklearn.preprocessing import normalize
 from scipy import sparse
 import scipy
@@ -18,7 +18,7 @@ from gensim.models.coherencemodel import CoherenceModel
 import ipdb
 
 from utils import printgr, printred, printmag
-from dbManager.base_dm_sql import BaseDMsql
+# from dbManager.base_dm_sql import BaseDMsql
 
 try:
     # UCS-4
@@ -86,50 +86,50 @@ if lemmatization:
     dbPASS = cf.get('DB', 'dbPASS')
     dbSERVER = cf.get('DB', 'dbSERVER')
     dbSOCKET = cf.get('DB', 'dbSOCKET')
-    DM = BaseDMsql(db_name=dbNAME, db_connector=dbCONNECTOR, path2db=None,
-               db_server=dbSERVER, db_user=dbUSER, db_password=dbPASS,
-               unix_socket=dbSOCKET)
+    # DM = BaseDMsql(db_name=dbNAME, db_connector=dbCONNECTOR, path2db=None,
+    #            db_server=dbSERVER, db_user=dbUSER, db_password=dbPASS,
+    #            unix_socket=dbSOCKET)
 
     printgr('Reading Agriculture data from database')
     AGR_df = pd.read_csv(csv_file_extended, low_memory=False, dtype=str)
     AGR_S2 = AGR_df['S2paperID'].values.tolist()
     AGR_df = pd.DataFrame()
-    for S2id in AGR_S2:
-        dfaux = DM.readDBtable('S2papers', limit=None, selectOptions='S2paperID, title, paperAbstract',
-                                filterOptions='S2paperID="'+S2id+'"')
-        AGR_df = AGR_df.append(dfaux, ignore_index = True)
-    print('Agriculture data loaded, #papers:', len(AGR_df))
+    # for S2id in AGR_S2:
+        # dfaux = DM.readDBtable('S2papers', limit=None, selectOptions='S2paperID, title, paperAbstract',
+        #                         filterOptions='S2paperID="'+S2id+'"')
+        # AGR_df = AGR_df.append(dfaux, ignore_index = True)
+    # print('Agriculture data loaded, #papers:', len(AGR_df))
 
-    from lemmatizer.ENlemmatizer import ENLemmatizer
-    lemmas_server = cf.get('Lemmatizer', 'server')
-    stw_file = Path(cf.get('Lemmatizer', 'default_stw_file'))
-    dict_eq_file = Path(cf.get('Lemmatizer', 'default_dict_eq_file'))
-    POS = cf.get('Lemmatizer', 'POS')
-    concurrent_posts = int(cf.get('Lemmatizer', 'concurrent_posts'))
-    removenumbers = cf.get('Lemmatizer', 'removenumbers') == 'True'
-    keepSentence = cf.get('Lemmatizer', 'keepSentence') == 'True'
-    init_time = time.time()
-    #Initialize lemmatizer
-    ENLM = ENLemmatizer(lemmas_server=lemmas_server, stw_file=stw_file,
-                    dict_eq_file=dict_eq_file, POS=POS, removenumbers=removenumbers,
-                    keepSentence=keepSentence)
+    # from lemmatizer.ENlemmatizer import ENLemmatizer
+    # lemmas_server = cf.get('Lemmatizer', 'server')
+    # stw_file = Path(cf.get('Lemmatizer', 'default_stw_file'))
+    # dict_eq_file = Path(cf.get('Lemmatizer', 'default_dict_eq_file'))
+    # POS = cf.get('Lemmatizer', 'POS')
+    # concurrent_posts = int(cf.get('Lemmatizer', 'concurrent_posts'))
+    # removenumbers = cf.get('Lemmatizer', 'removenumbers') == 'True'
+    # keepSentence = cf.get('Lemmatizer', 'keepSentence') == 'True'
+    # init_time = time.time()
+    # #Initialize lemmatizer
+    # ENLM = ENLemmatizer(lemmas_server=lemmas_server, stw_file=stw_file,
+    #                 dict_eq_file=dict_eq_file, POS=POS, removenumbers=removenumbers,
+    #                 keepSentence=keepSentence)
 
-    AGR_df['alltext'] = AGR_df['title'] + '. ' + AGR_df['paperAbstract']
-    AGR_df['alltext'] = AGR_df['alltext'].apply(clean_utf8)
-    lemasBatch = ENLM.lemmatizeBatch(AGR_df[['S2paperID', 'alltext']].values.tolist(),
-                                                processes=concurrent_posts)
-    #Remove entries that where not lemmatized correctly
-    lemasBatch = [[el[0], clean_utf8(el[1])] for el in lemasBatch]
-    print('Successful lemmatized documents: {len(lemasBatch)}')
-    elapsed_time = time.time() - init_time
-    print(f'Elapsed Time (seconds): {time.strftime("%H:%M:%S", time.gmtime(elapsed_time))}')
-    AGR_df['LEMAS'] = [el[1] for el in lemasBatch]
+    # AGR_df['alltext'] = AGR_df['title'] + '. ' + AGR_df['paperAbstract']
+    # AGR_df['alltext'] = AGR_df['alltext'].apply(clean_utf8)
+    # lemasBatch = ENLM.lemmatizeBatch(AGR_df[['S2paperID', 'alltext']].values.tolist(),
+    #                                             processes=concurrent_posts)
+    # #Remove entries that where not lemmatized correctly
+    # lemasBatch = [[el[0], clean_utf8(el[1])] for el in lemasBatch]
+    # print('Successful lemmatized documents: {len(lemasBatch)}')
+    # elapsed_time = time.time() - init_time
+    # print(f'Elapsed Time (seconds): {time.strftime("%H:%M:%S", time.gmtime(elapsed_time))}')
+    # AGR_df['LEMAS'] = [el[1] for el in lemasBatch]
 
-    #Save lemas to file
-    if not Path2corpus.exists():
-        Path2corpus.mkdir(parents=True)
-    AGR_df = AGR_df.replace(np.nan, '', regex=True)
-    AGR_df.to_csv(lemas_file, index=False)
+    # #Save lemas to file
+    # if not Path2corpus.exists():
+    #     Path2corpus.mkdir(parents=True)
+    # AGR_df = AGR_df.replace(np.nan, '', regex=True)
+    # AGR_df.to_csv(lemas_file, index=False)
 
 
 """
@@ -365,13 +365,13 @@ if trainMany:
                 thetas_file = path_model.joinpath('doc-topics.txt')
                 cols = [k for k in np.arange(2,ntopics+2)]
                 thetas32 = np.loadtxt(thetas_file, delimiter='\t', dtype=np.float32, usecols=cols)
-                allvalues = np.sort(thetas32.flatten())
-                step = int(np.round(len(allvalues)/1000))
-                plt.semilogx(allvalues[::step], (100/len(allvalues))*np.arange(0,len(allvalues))[::step])
-                plt.semilogx([sparse_thr, sparse_thr], [0,100], 'r')
-                plot_file = path_model.joinpath('thetas_dist.pdf')
-                plt.savefig(plot_file)
-                plt.close()
+                # allvalues = np.sort(thetas32.flatten())
+                # step = int(np.round(len(allvalues)/1000))
+                # plt.semilogx(allvalues[::step], (100/len(allvalues))*np.arange(0,len(allvalues))[::step])
+                # plt.semilogx([sparse_thr, sparse_thr], [0,100], 'r')
+                # plot_file = path_model.joinpath('thetas_dist.pdf')
+                # plt.savefig(plot_file)
+                # plt.close()
 
                 #sparsify thetas
                 thetas32[thetas32<sparse_thr] = 0

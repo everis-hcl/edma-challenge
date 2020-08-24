@@ -10,7 +10,7 @@ postFilter = True
 corpus_file = Path('./corpus/BIO/lemasAbstract/lemasAbstract.txt')
 #corpus_file = Path('./corpus/BIO/lemasWithProcedure/lemasWithProcedure.txt')
 
-base_tfidf = Path('./TFIDFcorpus/BIO/lemasAbstract/')
+base_tfidf = Path('./../data/TFIDFcorpus/BIO/lemasAbstract/')
 #base_tfidf = Path('./TFIDFcorpus/BIO/lemasWithProcedure/')
 
 csv_file = Path('./data/BIO/BIO_S2.csv')
