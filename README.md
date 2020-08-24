@@ -1,5 +1,7 @@
 # edma-challenge
 
+The solution is organised as a flexible pipeline where several NLP techniques (relevant keywords extraction, topic modeling, automatic classification, semantic mappings) are sequentially triggered in order to generate an accurate classification per RO type. At this stage, a solid baseline has been developed and would have to be fine-tuned per each RO and better evaluated.
+
 ## 1. Project structure
 
 ### /data
