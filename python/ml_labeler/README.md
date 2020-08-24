@@ -1,4 +1,5 @@
 
+
 # ML labelling
 
 ML labelling is a tool to label lists of words to a given taxonomy. 
@@ -38,6 +39,8 @@ To run the scripts, a source data folder should exist, with the following struct
     |   |- EXT_WDcorpus_tfidf
     |-wikisources
          |-enwiki-20200801-all-titles-in-ns0
+
+An example of the source folder can be taken from [here](http://www.tsc.uc3m.es/~jcid/source.tar.gz).
 
 ### 3.1. NETL support files
 
