@@ -13,6 +13,8 @@ The tool is oriented to process the specific files generated for the **edma chal
 ## 1. Prerequisites
  * [Python 3.8](https://www.python.org/downloads/)
  * [Anaconda](https://docs.anaconda.com/anaconda/install/)
+ * [Requirement from python folder](https://github.com/everis-hcl/edma-challenge/blob/master/python/README.md)
+
 
 ## 2. Scripts:
 

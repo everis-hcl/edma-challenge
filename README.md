@@ -88,3 +88,15 @@ Important files:
 *  **`computeTFIDF_AGR.py`**: Calculate TFIDF for AGR corpus.
 *  **`computeTFIDF_BIO.py`**: Calculate TFIDF for BIO corpus.
 *  **`computeTFIDF_GIT.py`**: Calculate TFIDF for GIT corpus.
+
+## 2. Instructions to reproduce the final results
+### P1 – FROM identified topics and extracted keywords TO well-structured CSV files
+
+####  A. Machine Learning approach
+Run the `ml_labeler`available in the [/python/ml_labeller](https://github.com/everis-hcl/edma-challenge/tree/master/python/ml_labeler) folder following the instruction in described the [README.md](https://github.com/everis-hcl/edma-challenge/blob/master/python/ml_labeler/README.md).
+
+#### B. Semantic mapping with SPARQL endpoints
+Run the 3 scripts available in the [/java/sparql-mapping](https://github.com/everis-hcl/edma-challenge/tree/master/java/sparql-mapping) folder following the instruction in described the [README.md](https://github.com/everis-hcl/edma-challenge/blob/master/java/README.md):
+* **`RunSPARQLMapperAGR.py`**: SPARQLMapper launcher for AGR corpus.
+* **`RunSPARQLMapperBIO.py`**: SPARQLMapper launcher for BIO corpus.
+* **`RunSPARQLMapperGIT.py`**: SPARQLMapper launcher for BIT corpus.
