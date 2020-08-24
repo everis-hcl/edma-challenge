@@ -10,8 +10,6 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 import org.apache.commons.lang3.StringUtils;
-//import org.apache.jena.query.*;
-//import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -31,7 +29,7 @@ import java.util.stream.Stream;
 import static java.lang.Thread.sleep;
 
 /**
- * Hello world!
+ * SPARQL Mapper
  *
  */
 public class SPARQLMapper
@@ -39,14 +37,14 @@ public class SPARQLMapper
 	private static int rowNum = 1;
 	private static int maxHeight = 1;
 	private static final String UNDERSCORE = "_";
-	private static List<Integer> mappedKeywordCountPerDocument = new ArrayList<Integer>();
+
 	private static int keywordCount = 0;
-	private static final int MYTHREADS = 20;
 	private static final String CHEMBL_STRING = "chembl";
 	private static final String AGROVOC_STRING = "agrovoc";
 	private static final String MESH_STRING = "mesh";
 	private static final String DBPEDIA_STRING = "dbPedia";
 	private static final String EUROSCIVOC_STRING = "euroSciVoc";
+	private static int countOfMappedKeywords = 0;
 
 	public static void main(String[] args) throws Exception
 	{
@@ -132,14 +130,10 @@ public class SPARQLMapper
 	}
 
 	private static void printStatistics() {
-		int totalMappedKeywords = 0;
-		for(Integer i : mappedKeywordCountPerDocument){
-			totalMappedKeywords= totalMappedKeywords +i;
-		}
 		System.out.println("Keyword Count: "+keywordCount);
-		System.out.println("Total Mapped Keywords: "+totalMappedKeywords);
-		System.out.println("Percentage of Mapped Keywords: " + (Math.round(totalMappedKeywords*100/keywordCount)));
-		System.out.println("Average of Mapped Keywords Per Document: " + (totalMappedKeywords / mappedKeywordCountPerDocument.size()));
+		System.out.println("Total Mapped Keywords: "+countOfMappedKeywords);
+		System.out.println("Percentage of Mapped Keywords: " + (Math.round(countOfMappedKeywords*100/keywordCount)));
+
 	}
 
 	private static void processCorpusAndProduceKeywordReplacedFile(String corpusFileName, Map keywordsMap, String keywordReplacedCorpusFile) throws Exception{
@@ -176,107 +170,212 @@ public class SPARQLMapper
 		}
 		fw.close();
 	}
+	public static class Mapped {
+		private String score;
+
+		public String getKeyword() {
+			return keyword;
+		}
+
+		public void setKeyword(String keyword) {
+			this.keyword = keyword;
+		}
+
+		private String keyword;
+
+		public Mapped(String keyword){
+			this.keyword = keyword;
+		}
+		public String getScore() {
+			return score;
+		}
+
+		public void setScore(String score) {
+			this.score = score;
+		}
+
+		public List<String> getAgrovocURI() {
+			return agrovocURI;
+		}
+
+		public void setAgrovocURI(List<String> agrovocURI) {
+			this.agrovocURI = agrovocURI;
+		}
+
+		public List<String> getChemblURI() {
+			return chemblURI;
+		}
+
+		public void setChemblURI(List<String> chemblURI) {
+			this.chemblURI = chemblURI;
+		}
+
+		public List<String> getMeshURI() {
+			return meshURI;
+		}
+
+		public void setMeshURI(List<String> meshURI) {
+			this.meshURI = meshURI;
+		}
+
+		public List<String> getDbPediaURI() {
+			return dbPediaURI;
+		}
+
+		public void setDbPediaURI(List<String> dbPediaURI) {
+			this.dbPediaURI = dbPediaURI;
+		}
+
+		public List<String> getEuroSciVocURI() {
+			return euroSciVocURI;
+		}
+
+		public void setEuroSciVocURI(List<String> euroSciVocURI) {
+			this.euroSciVocURI = euroSciVocURI;
+		}
+
+		private List<String> agrovocURI;
+		private List<String> chemblURI;
+		private List<String> meshURI;
+		private List<String> dbPediaURI;
+		private List<String> euroSciVocURI;
+
+
+
+	}
 
 	private static void performMappingForDocuments(LinkedHashMap<String, Map<String, Double>> documentMap, String mappingExcelFile) throws Exception{
 		String[] columns = new String[]{"DocumentId", "Keyword", "Score","Agrovoc URIs", "Mesh URIs", "Chembl URIs",  "DBPedia URIs", "EuroSciVoc URIs"};
 
 		Workbook workbook = createExcelWorkbook(columns);
 		Iterator itDocuments = documentMap.entrySet().iterator();
+		ExecutorService executor = Executors.newFixedThreadPool(documentMap.size() < 300 ? documentMap.size() : 300);
+		List<Future<?>> futures = new ArrayList<Future<?>>();
+		LinkedHashMap<String, List<Mapped>> mappedMap = new LinkedHashMap<String, List<Mapped>>();
+
 		while (itDocuments.hasNext()) {
 
-			int countOfMappedKeywords = 0;
+
 			Map.Entry documentEntry = (Map.Entry)itDocuments.next();
 			String documentId = (String)documentEntry.getKey();
 			System.out.println("Processing method performMappingForDocuments for documentId: "+documentId);
-			Map keywordsMap = (TreeMap)documentEntry.getValue();
-			int i = 0;
-			Iterator itKeywords = keywordsMap.entrySet().iterator();
-			int minValue = keywordsMap.size() < 20 ? keywordsMap.size() : 20;
-			LinkedHashMap<String, HashMap<String, List<String>>> keywordsMappings = new LinkedHashMap<String, HashMap<String, List<String>>>();
-			ExecutorService executor = Executors.newFixedThreadPool(MYTHREADS);
-			List<Future<?>> futures = new ArrayList<Future<?>>();
-			while(i < minValue ){
-				i++;
-				keywordCount++;
-				Map.Entry keywordEntry = (Map.Entry)itKeywords.next();
-				String keyword = (String)keywordEntry.getKey();
-				Double score = (Double)keywordEntry.getValue();
-				String keywordScoreString = keyword + ":" + score.toString();
-				keywordsMappings.put(keywordScoreString, new HashMap<String, List<String>>() );
-				//List<String> chemblUris = findInChembl(keyword);
-				Runnable keywordMapper = new KeywordMapperRunnable(keywordScoreString, keywordsMappings);
-				Future<?> future = executor.submit(keywordMapper);
-				futures.add(future);
-			}
-			// Wait until all threads are finish
-			for(Future<?> future : futures)
-				future.get();
+			TreeMap keywordsMap = (TreeMap)documentEntry.getValue();
+			List<Mapped> mappedList = new ArrayList<Mapped>();
+			mappedMap.put(documentId, mappedList);
+			Runnable documentKeywordMapper = new DocumentKeywordMapperRunnable(documentId, keywordsMap, mappedMap);
+			Future<?> future = executor.submit(documentKeywordMapper);
+			futures.add(future);
 
-			executor.shutdownNow();
-			Iterator itKeywordsMapping = keywordsMappings.entrySet().iterator();
-			while (itKeywordsMapping.hasNext()) {
-				Map.Entry keywordMap = (Map.Entry)itKeywordsMapping.next();
-				String keywordScore = (String)keywordMap.getKey();
-				String[] keys = keywordScore.split(":");
-				HashMap<String, List<String>> keywordMaps = (HashMap<String, List<String>>)keywordMap.getValue();
-				List<String> chemblUris = keywordMaps.get(CHEMBL_STRING);
-				List<String> agrovocUris = keywordMaps.get(AGROVOC_STRING);
-				List<String> meshUris = keywordMaps.get(MESH_STRING);
-				List<String> dbPediaUris = keywordMaps.get(DBPEDIA_STRING);
-				List<String> euroSciVocUris = keywordMaps.get(EUROSCIVOC_STRING);
+		}
+		// Wait until all threads are finished
+		for(Future<?> future : futures)
+			future.get();
 
+		executor.shutdownNow();
+		Iterator itKeywordsMapping = mappedMap.entrySet().iterator();
+		while (itKeywordsMapping.hasNext()) {
+			Map.Entry keywordMap = (Map.Entry)itKeywordsMapping.next();
+			String documentId = (String)keywordMap.getKey();
+			List<Mapped> listMappedObjects = (List<Mapped>)keywordMap.getValue();
+			for(Mapped mapped  : listMappedObjects){
+				List<String> chemblUris = mapped.getChemblURI();
+				List<String> agrovocUris = mapped.getAgrovocURI();
+				List<String> meshUris = mapped.getMeshURI();
+				List<String> dbPediaUris = mapped.getDbPediaURI();
+				List<String> euroSciVocUris = mapped.getEuroSciVocURI();
 				if(chemblUris.size() > 0 || agrovocUris.size() > 0 || meshUris.size() > 0 || dbPediaUris.size()>0 || euroSciVocUris.size()>0){
 					countOfMappedKeywords++;
 				}
-				writeToExcel(workbook, columns, documentId, keys[0], keys[1], agrovocUris, meshUris, chemblUris, dbPediaUris, euroSciVocUris);
+				writeToExcel(workbook, columns, documentId, mapped.getKeyword(), mapped.getScore(), agrovocUris, meshUris, chemblUris, dbPediaUris, euroSciVocUris);
 			}
-
-			mappedKeywordCountPerDocument.add(countOfMappedKeywords);
-
 		}
 		closeWorkbook(workbook, mappingExcelFile);
 
 	}
 
-	public static class KeywordMapperRunnable implements Runnable {
-		private String keywordScore;
+	public static class DocumentKeywordMapperRunnable implements Runnable {
+		private String documentId;
+		private TreeMap keywordsMap;
+		LinkedHashMap<String, List<Mapped>> mappedMap;
 		LinkedHashMap<String, HashMap<String, List<String>>> keywordsMappings;
 
-		KeywordMapperRunnable(String keywordScore, LinkedHashMap<String, HashMap<String, List<String>>> keywordsMappings) {
-			this.keywordsMappings = keywordsMappings;
-			this.keywordScore = keywordScore;
+		DocumentKeywordMapperRunnable(String documentId, TreeMap keywordsMap, LinkedHashMap<String, List<Mapped>> mappedMap) {
+			this.documentId = documentId;
+			this.keywordsMap = keywordsMap;
+			this.mappedMap = mappedMap;
 		}
 
 		@Override
 		public void run() {
 
 			try {
-				String[] keys = keywordScore.split(":");
-				String keyword = keys[0].trim();
-				System.out.println("Processing keyword "+keyword);
-				List<String> chemblUris = new ArrayList<String>();
-				//List<String> agrovocUris = new ArrayList<String>();
-				//List<String> meshUris = new ArrayList<String>();
-				//List<String> dbPediaUris = new ArrayList<String>();
-				List<String> euroSciVocUris = findInEuroSciVoc(keyword);
-				List<String> agrovocUris = findInAgrovoc(keyword);
-				List<String> meshUris = findInMesh(keyword);
-				List<String> dbPediaUris = findInDBPedia(keyword);
-				HashMap<String, List<String>> mappings = keywordsMappings.get(keywordScore);
-				mappings.put(CHEMBL_STRING,chemblUris);
-				mappings.put(AGROVOC_STRING,agrovocUris);
-				mappings.put(MESH_STRING,meshUris);
-				mappings.put(DBPEDIA_STRING,dbPediaUris);
-				mappings.put(EUROSCIVOC_STRING,euroSciVocUris);
-				keywordsMappings.put(keywordScore, mappings);
-
+				int i = 0;
+				List<Mapped> mappedList = this.mappedMap.get(documentId);
+				Iterator itKeywords = this.keywordsMap.entrySet().iterator();
+				int minValue = this.keywordsMap.size() < 20 ? this.keywordsMap.size() : 20;
+				LinkedHashMap<String, HashMap<String, List<String>>> keywordsMappings = new LinkedHashMap<String, HashMap<String, List<String>>>();
+				while(i < minValue ){
+					i++;
+					keywordCount++;
+					Map.Entry keywordEntry = (Map.Entry)itKeywords.next();
+					String keyword = (String)keywordEntry.getKey();
+					Double score = (Double)keywordEntry.getValue();
+					String keywordScoreString = keyword + ":" + score.toString();
+					keywordsMappings.put(keywordScoreString, new HashMap<String, List<String>>() );
+					//List<String> chemblUris = findInChembl(keyword);
+					mapKeywords(keywordScoreString, keywordsMappings);
+				}
+				Iterator itKeywordsMapping = keywordsMappings.entrySet().iterator();
+				while (itKeywordsMapping.hasNext()) {
+					Map.Entry keywordMap = (Map.Entry)itKeywordsMapping.next();
+					String keywordScore = (String)keywordMap.getKey();
+					String[] keys = keywordScore.split(":");
+					HashMap<String, List<String>> keywordMaps = (HashMap<String, List<String>>)keywordMap.getValue();
+					List<String> chemblUris = keywordMaps.get(CHEMBL_STRING);
+					List<String> agrovocUris = keywordMaps.get(AGROVOC_STRING);
+					List<String> meshUris = keywordMaps.get(MESH_STRING);
+					List<String> dbPediaUris = keywordMaps.get(DBPEDIA_STRING);
+					List<String> euroSciVocUris = keywordMaps.get(EUROSCIVOC_STRING);
+					Mapped mapped = new Mapped(keys[0]);
+					mapped.setScore(keys[1]);
+					mapped.setAgrovocURI(agrovocUris);
+					mapped.setMeshURI(meshUris);
+					mapped.setChemblURI(chemblUris);
+					mapped.setDbPediaURI(dbPediaUris);
+					mapped.setEuroSciVocURI(euroSciVocUris);
+					mappedList.add(mapped);
+				}
+				this.mappedMap.put(documentId, mappedList);
 			} catch (Exception e){
-				System.err.println("Error in processing keyword "+keywordScore);
+				System.err.println("Error in processing  ");
 			}
 
 		}
 	}
 
+	public static void mapKeywords(String keywordScore, LinkedHashMap<String, HashMap<String, List<String>>> keywordsMappings) {
+
+		try {
+			String[] keys = keywordScore.split(":");
+			String keyword = keys[0].trim();
+			System.out.println("Processing keyword " + keyword);
+			List<String> chemblUris = new ArrayList<String>();
+			List<String> euroSciVocUris = findInEuroSciVoc(keyword);
+			List<String> agrovocUris = findInAgrovoc(keyword);
+			List<String> meshUris = findInMesh(keyword);
+			List<String> dbPediaUris = findInDBPedia(keyword);
+			HashMap<String, List<String>> mappings = keywordsMappings.get(keywordScore);
+			mappings.put(CHEMBL_STRING, chemblUris);
+			mappings.put(AGROVOC_STRING, agrovocUris);
+			mappings.put(MESH_STRING, meshUris);
+			mappings.put(DBPEDIA_STRING, dbPediaUris);
+			mappings.put(EUROSCIVOC_STRING, euroSciVocUris);
+			keywordsMappings.put(keywordScore, mappings);
+
+		} catch (Exception e) {
+			System.err.println("Error in processing keyword " + keywordScore);
+		}
+	}
 	private static TreeMap<String, Double> sortMapByScore(Map<String, Double> keywordScoreMap) {
 		ScoreComparator bvc = new ScoreComparator(keywordScoreMap);
 		TreeMap<String, Double> sorted_map = new TreeMap<String, Double>(bvc);
